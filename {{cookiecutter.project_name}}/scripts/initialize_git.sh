@@ -9,4 +9,4 @@ git config user.email "{{cookiecutter.email}}"
 git config user.name "{{cookiecutter.full_name}}"
 
 git add --all
-git commit -v -a
+git commit -v -a -m 'init'

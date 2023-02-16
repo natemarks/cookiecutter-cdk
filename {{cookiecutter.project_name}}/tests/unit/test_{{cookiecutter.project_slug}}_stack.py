@@ -7,19 +7,19 @@ from {{cookiecutter.project_slug}}.{{cookiecutter.project_slug}}_stack import Ex
 
 @pytest.mark.deployment
 def test_sqs_queue_created():
-    """ meaningless test to verify pytest"""
+    """meaningless test to verify pytest"""
     app = core.App()
     stack = ExampleStack(app, "deleteme-cdk")
     template = assertions.Template.from_stack(stack)
 
-    template.has_resource_properties("AWS::SQS::Queue", {
-        "VisibilityTimeout": 300
-    })
+    template.has_resource_properties(
+        "AWS::SQS::Queue", {"VisibilityTimeout": 300}
+    )
 
 
 @pytest.mark.deployment
 def test_sns_topic_created():
-    """ meaningless test to verify pytest"""
+    """meaningless test to verify pytest"""
     app = core.App()
     stack = ExampleStack(app, "deleteme-cdk")
     template = assertions.Template.from_stack(stack)

@@ -43,7 +43,8 @@ class RDSSecret:
 
 
 class HybridRDSInstance:  # pylint: disable=too-few-public-methods
-    """ RDS instance """
+    """RDS instance"""
+
     # instance:database lookup
     instance_database = {
         "applex": ["cloudauth", "onesign"],

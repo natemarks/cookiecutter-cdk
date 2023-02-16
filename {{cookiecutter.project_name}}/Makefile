@@ -11,6 +11,9 @@ CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 help: ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
+initialize-git: ## initialize git if it doesn't exist
+	[[ ! -e .git ]] && bash scripts/initialize_git.sh
+
 clean-venv: ## re-create virtual env
 	[[ -e .venv ]] && rm -rf .venv; \
 	python3 -m venv .venv; \
