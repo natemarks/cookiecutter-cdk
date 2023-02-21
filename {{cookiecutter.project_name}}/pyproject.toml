@@ -9,3 +9,6 @@ markers = [
     "experimental: experimental tests",
     "unit: should be run on every commit",
 ]
+testpaths = [
+    "tests"
+]

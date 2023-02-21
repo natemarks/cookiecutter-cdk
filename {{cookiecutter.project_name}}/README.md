@@ -1,4 +1,4 @@
-#  {{ cookiecutter.project_slug }}
+#  {{ cookiecutter.project_name }}
 
 Describe the purpose of this CDK project here.
 
