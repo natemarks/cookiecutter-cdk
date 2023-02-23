@@ -63,6 +63,10 @@ clean-cache: ## clean python adn pytest cache data
 	@find . -type d -name __pycache__ -not -path "./.venv/*" -exec rm -rf {} \;
 	@rm -rf .pytest_cache
 
+undo_edits: ## undo all uncommitted changes
+	git reset HEAD --hard
+	git clean -f
+
 git-status: ## require status is clean so we can use undo_edits to put things back
 	@status=$$(git status --porcelain); \
 	if [ ! -z "$${status}" ]; \
