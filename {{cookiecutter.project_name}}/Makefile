@@ -5,6 +5,7 @@
 SHELL := $(shell which bash)
 DEFAULT_BRANCH := main
 COMMIT := $(shell git rev-parse HEAD)
+CDK := node_modules/.bin/cdk
 
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
