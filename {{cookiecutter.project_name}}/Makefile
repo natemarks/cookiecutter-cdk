@@ -76,8 +76,26 @@ git-status: ## require status is clean so we can use undo_edits to put things ba
 		exit 1; \
 	fi
 
-
 rebase: git-status ## rebase current feature branch on to the default branch
 	git fetch && git rebase origin/$(DEFAULT_BRANCH)
+
+
+cdk-ls: ## run cdk ls
+	( \
+       source .venv/bin/activate; \
+       $(CDK) ls -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+    )
+
+cdk-synth: ## run cdk synth
+	( \
+       source .venv/bin/activate; \
+       $(CDK) synth -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+    )
+
+cdk-deploy: ## run cdk
+	( \
+       source .venv/bin/activate; \
+       $(CDK) deploy $(stack) -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+    )
 
 .PHONY: build static test artifact	
