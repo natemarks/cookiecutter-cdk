@@ -6,7 +6,8 @@ SHELL := $(shell which bash)
 DEFAULT_BRANCH := main
 COMMIT := $(shell git rev-parse HEAD)
 CDK := node_modules/.bin/cdk
-
+PYTHON_VERSION := 3.10.6
+CDK_VERSION := 2.70.0
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 help: ## Show this help.
@@ -17,15 +18,21 @@ initialize-git: ## initialize git if it doesn't exist
 
 clean-venv: ## re-create virtual env
 	[[ -e .venv ]] && rm -rf .venv; \
-	python3 -m venv .venv; \
 	( \
-       . .venv/bin/activate; \
-       pip install --upgrade pip; \
+       source scripts/enable_pyenv.sh; \
+       pyenv local $(PYTHON_VERSION); \
+       python3 -m venv .venv; \
+       source .venv/bin/activate; \
+       pip install --upgrade pip setuptools; \
        pip install -r requirements.txt; \
     )
 
-update_cdk_libs: ## update the node and python cdk libraries. recreate venv. may have to restart IDE
+update_cdk_libs: ## install the latest version of aws cdk node and python packages
 	bash scripts/update_cdk_libs.sh
+	$(MAKE) clean-venv
+
+install_cdk_libs: ## install the project version of aws cdk node and python packages
+	bash scripts/update_cdk_libs.sh $(CDK_VERSION)
 	$(MAKE) clean-venv
 
 pylint: ## run pylint on python files
@@ -79,23 +86,46 @@ git-status: ## require status is clean so we can use undo_edits to put things ba
 rebase: git-status ## rebase current feature branch on to the default branch
 	git fetch && git rebase origin/$(DEFAULT_BRANCH)
 
+node_modules:
+	bash scripts/update_cdk_libs.sh $(CDK_VERSION)
+	$(MAKE) clean-venv
 
-cdk-ls: ## run cdk ls
+cdk-ls: node_modules ## run cdk ls
+	# cdk executable usually: node_modules/aws-cdk/bin/cdk
+	# have to be evaluated after the node_modules target
+	$(eval CDK := $(shell find . -type f -name cdk))
 	( \
+       source scripts/enable_pyenv.sh; \
+       pyenv local $(PYTHON_VERSION); \
+       python --version; \
        source .venv/bin/activate; \
-       $(CDK) ls -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+       $(CDK) ls -c commit=$(COMMIT); \
     )
 
-cdk-synth: ## run cdk synth
+cdk-diff: node_modules ## run cdk diff
+	# cdk executable usually: node_modules/aws-cdk/bin/cdk
+	# have to be evaluated after the node_modules target
+	$(eval CDK := $(shell find . -type f -name cdk))
 	( \
+       source scripts/enable_pyenv.sh; \
+       pyenv local $(PYTHON_VERSION); \
+       python --version; \
        source .venv/bin/activate; \
-       $(CDK) synth -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+       $(CDK) diff -c commit=$(COMMIT); \
     )
 
-cdk-deploy: ## run cdk
+cdk-deploy: node_modules ## run cdk deploy
+	# cdk executable usually: node_modules/aws-cdk/bin/cdk
+	# have to be evaluated after the node_modules target
+	$(eval CDK := $(shell find . -type f -name cdk))
+	# source the pyenv config script
+	# set the local pythin version. redundant but harmless
 	( \
+       source scripts/enable_pyenv.sh; \
+       pyenv local $(PYTHON_VERSION); \
+       python --version; \
        source .venv/bin/activate; \
-       $(CDK) deploy $(stack) -c hybrid_env=$(DEFAULT_ENVIRONMENT); \
+       $(CDK) deploy -c commit=$(COMMIT); \
     )
 
 .PHONY: build static test artifact	

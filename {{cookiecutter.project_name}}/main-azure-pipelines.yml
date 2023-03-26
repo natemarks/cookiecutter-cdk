@@ -1,0 +1,90 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+#
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: "novpn-azure-agents"
+
+variables:
+  - name: devops_tools_version
+    value: "0.0.46"
+resources:
+  repositories:
+    - repository: cdk-novpn-aa
+      type: github
+      name: 'imprivata-cloud/cdk-novpn-azure-agent'
+      endpoint: 'imprivata-cloud'
+stages:
+  - stage: 'Publish_AMI'
+    jobs:
+      - job: "make_packer_publish"
+        timeoutInMinutes: 30
+        steps:
+          - task: AmazonWebServices.aws-vsts-tools.AWSShellScript.AWSShellScript@1
+            displayName: 'Packer Publish'
+            inputs:
+              awsCredentials: 'i-platform-dev azure_pipelines_admin'
+              regionName: 'us-east-1'
+              scriptType: inline
+              failOnStandardError: false
+              inlineScript: |
+                echo "CURRENT DIRECTORY: $(pwd)"
+                echo "PIPELINE WORKSPACE: $(Pipeline.Workspace)"
+                echo "AGENT BUILD: $(Agent.BuildDirectory)"
+                echo "AGENT HOME: $(Agent.HomeDirectory)"
+                echo "AGENT TEMP: $(Agent.TempDirectory)"
+                echo "AGENT TOOLS: $(Agent.ToolsDirectory)"
+                echo "AGENT WORK: $(Agent.WorkFolder)"
+                echo "BUILD ARTIFACT STAGING: $(Build.ArtifactStagingDirectory)"
+                echo "BUILD BINARIES DIRECTORY: $(Build.BinariesDirectory)"
+                echo "BUILD REPO LOCAL PATH: $(Build.Repository.LocalPath)"
+                echo "BUILD REPO NAME STAGING: $(Build.Repository.Name)"
+                echo "BUILD SOURCES DIRECTORY: $(Build.SourcesDirectory)"
+                echo "BUILD STAGING DIRECTORY: $(Build.StagingDirectory)"
+                echo "BUILD TEST RESULTS DIRECTORY: $(Common.TestResultsDirectory)"
+                echo "SYSTEM DEFAULT WORKING DIRECTORY: $(System.DefaultWorkingDirectory)"
+                make cdk-ls
+  - stage: 'Deploy_ASG_Stack'
+    jobs:
+      - deployment: DeploymentApproval
+        variables:
+          cdk_repo_commit: $[ stageDependencies.Prepare_artifacts.Prepare_Deployment.outputs['zzset_vars.cdk_repo_commit'] ]
+          ami_id: $[ stageDependencies.Prepare_artifacts.Prepare_Deployment.outputs['zzset_vars.ami_id'] ]
+        environment: "non-prod operations"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: cdk-novpn-aa
+                  clean: true
+                - task: AmazonWebServices.aws-vsts-tools.AWSShellScript.AWSShellScript@1
+                  displayName: "CDK Diff"
+                  inputs:
+                    awsCredentials: 'i-platform-dev azure_pipelines_admin'
+                    regionName: 'us-east-1'
+                    scriptType: inline
+                    failOnStandardError: False
+                    inlineScript: |
+                      echo "CURRENT DIRECTORY: $(pwd)"
+                      echo "PIPELINE WORKSPACE: $(Pipeline.Workspace)"
+                      echo "AGENT BUILD: $(Agent.BuildDirectory)"
+                      echo "AGENT HOME: $(Agent.HomeDirectory)"
+                      echo "AGENT TEMP: $(Agent.TempDirectory)"
+                      echo "AGENT TOOLS: $(Agent.ToolsDirectory)"
+                      echo "AGENT WORK: $(Agent.WorkFolder)"
+                      echo "BUILD ARTIFACT STAGING: $(Build.ArtifactStagingDirectory)"
+                      echo "BUILD BINARIES DIRECTORY: $(Build.BinariesDirectory)"
+                      echo "BUILD REPO LOCAL PATH: $(Build.Repository.LocalPath)"
+                      echo "BUILD REPO NAME STAGING: $(Build.Repository.Name)"
+                      echo "BUILD SOURCES DIRECTORY: $(Build.SourcesDirectory)"
+                      echo "BUILD STAGING DIRECTORY: $(Build.StagingDirectory)"
+                      echo "BUILD TEST RESULTS DIRECTORY: $(Common.TestResultsDirectory)"
+                      echo "SYSTEM DEFAULT WORKING DIRECTORY: $(System.DefaultWorkingDirectory)"
+                      
+                      make cdk-diff
