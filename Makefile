@@ -20,10 +20,6 @@ clean-venv: ## re-create virtual env
        pip install -r requirements.txt; \
     )
 
-update_cdk_libs: ## update the node and python cdk libraries. recreate venv. may have to restart IDE
-	bash scripts/update_cdk_libs.sh
-	$(MAKE) clean-venv
-
 pylint: ## run pylint on python files
 	( \
        . .venv/bin/activate; \
@@ -51,6 +47,12 @@ unittest: ## run test that don't require deployed resources
 	( \
        source .venv/bin/activate; \
        python3 -m pytest -v -m "unit" tests/; \
+    )
+
+update_golden: ## update test golden files using the current actual results
+	( \
+       source .venv/bin/activate; \
+       python3 -m pytest -v -m "unit" tests/ --update_golden; \
     )
 
 static: black shellcheck pylint unittest ## run all local static checks
