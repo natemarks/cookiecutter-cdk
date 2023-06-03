@@ -17,20 +17,23 @@ import pathlib
 import sys
 import pytest
 
+
 def remove_suffix(value: str, suffix: str) -> str:
     """use slicing to be compatible with python before 3.8"""
     if value.endswith(suffix):
-        return value[:-len(suffix)]
+        return value[: -len(suffix)]
+
 
 def strip_parent_path(value: str, parent_path: str) -> str:
-    """ remove parent path (prefix) from path
+    """remove parent path (prefix) from path
     given:
     /tmp/pytest-of-nmarks/pytest-24/test_cookiecutter_orange_0/cdk-my-project-name
     get:
     /cdk-my-project-name
 
     """
-    return value[len(parent_path):]
+    return value[len(parent_path) :]
+
 
 def get_logger(module_name: str) -> logging.Logger:
     """return standard logger
@@ -53,6 +56,8 @@ def get_logger(module_name: str) -> logging.Logger:
 
 
 module_logger = get_logger(str(__name__))
+
+
 class Case:
     """A test case
 
@@ -128,26 +133,30 @@ class Case:
 class Input:
     project_name: str
 
+
 @dataclass
 class Output:
     """test output object used to compare actual and expected output"""
+
     project_dir: str
 
 
 class Result:
     """test result"""
+
     def __init__(self, output_dir: str):
         self.actual = {}
-        self.output_dir =  str(output_dir)
+        self.output_dir = str(output_dir)
         self.set_project_dir
 
     @property
     def set_project_dir(self):
-        res = glob(f"{self.output_dir}/*", recursive = False)
+        res = glob(f"{self.output_dir}/*", recursive=False)
         if len(res) != 1:
             module_logger.error("expected one project dir. got: %i", len(res))
             return
         # strip the random temp dir parent path from the project dir
 
-        self.actual['project_dir'] = strip_parent_path(str(res[0]), self.output_dir)
-
+        self.actual["project_dir"] = strip_parent_path(
+            str(res[0]), self.output_dir
+        )
