@@ -33,9 +33,7 @@ def test_strip_parent_path():
     ],
 )
 def test_cookiecutter(tmp_path, request, update_golden):
-    """test cookiecutter template
-
-    """
+    """test cookiecutter template"""
     case = Case(request)
 
     cookiecutter(

@@ -23,19 +23,19 @@ clean-venv: ## re-create virtual env
 pylint: ## run pylint on python files
 	( \
        . .venv/bin/activate; \
-       git ls-files '*.py' | xargs pylint --max-line-length=90; \
+       bash scripts/pylint.sh; \
     )
 
 black: ## use black to format python files
 	( \
        . .venv/bin/activate; \
-       git ls-files '*.py' |  xargs black --line-length=79; \
+       bash scripts/black.sh; \
     )
 
 black-check: ## use black to format python files
 	( \
        . .venv/bin/activate; \
-       git ls-files '*.py' |  xargs black --check --line-length=79; \
+       bash scripts/black-check.sh; \
     )
 
 shellcheck: ## use black to format python files
