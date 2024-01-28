@@ -13,6 +13,7 @@ from glob import glob
 import json
 import logging
 import os
+from pathlib import Path
 import sys
 import pytest
 
@@ -147,13 +148,11 @@ class Output:
 class Result:
     """test result"""
 
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: Path):
         self.actual = {}
         self.output_dir = str(output_dir)
-        # pylint: disable=pointless-statement
-        self.set_project_dir
+        self.set_project_dir()
 
-    @property
     def set_project_dir(self):
         """set the project dir from the output dir"""
         res = glob(f"{self.output_dir}/*", recursive=False)
