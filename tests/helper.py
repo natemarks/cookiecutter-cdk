@@ -13,7 +13,6 @@ from glob import glob
 import json
 import logging
 import os
-import pathlib
 import sys
 import pytest
 
@@ -22,6 +21,7 @@ def remove_suffix(value: str, suffix: str) -> str:
     """use slicing to be compatible with python before 3.8"""
     if value.endswith(suffix):
         return value[: -len(suffix)]
+    return value
 
 
 def strip_parent_path(value: str, parent_path: str) -> str:
@@ -131,6 +131,8 @@ class Case:
 
 @dataclass
 class Input:
+    """test input object used to drive test runs"""
+
     project_name: str
 
 
@@ -141,16 +143,19 @@ class Output:
     project_dir: str
 
 
+# pylint: disable=too-few-public-methods
 class Result:
     """test result"""
 
     def __init__(self, output_dir: str):
         self.actual = {}
         self.output_dir = str(output_dir)
+        # pylint: disable=pointless-statement
         self.set_project_dir
 
     @property
     def set_project_dir(self):
+        """set the project dir from the output dir"""
         res = glob(f"{self.output_dir}/*", recursive=False)
         if len(res) != 1:
             module_logger.error("expected one project dir. got: %i", len(res))

@@ -1,9 +1,8 @@
 """ test module: {{cookiecutter.project_slug}}/data.py"""
+import pathlib
 import pytest
 
 from cookiecutter.main import cookiecutter
-import os
-import pathlib
 from tests.helper import Case, Result, remove_suffix, strip_parent_path
 
 TEMPLATE_DIRECTORY = str(pathlib.Path(__file__).parent.parent)
